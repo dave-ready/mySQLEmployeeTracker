@@ -23,13 +23,50 @@ var connection = mysql.createConnection({
             choices: [
                 "view All Employees",
                 "view All Employees By Department",
-                "view All Employees By Manager",
+                "view All Employees By Role",
                 "Add Employee",
-                "Remove Employee",
-                "Update Employee Role",
-                "Update Employee Manager"
-            ]}
-}
+                "Add Department",
+                "Add Role",
+                "Update Employee",
+                "End Session"
+
+              ]};
+
+          ]).then(function(res){
+            switch (res.options){
+                case "view All Employees":
+                    viewEmployees();
+                break; 
+
+                case "view All Employees By Department":
+                    viewDepartment();
+                break;
+
+                case "view All Employees By Role":
+                    viewRole();
+                break;
+
+                case "Add Employee":
+                    addEmployee();
+                break;
+
+                case "Add Department":
+                    addDepartment();
+                break;
+
+                case "Add Role":
+                    addRole();
+                break;
+
+                case "Update Employee":
+                    updateEmployee();
+                break;
+
+                default:
+                    endSession();
+            };
+        });
+};
 
 
 
