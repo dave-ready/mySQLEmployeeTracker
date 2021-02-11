@@ -6,13 +6,19 @@ const util = require("util");
 const cTable = require("console.table");
 const env = require(".env");
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
     user: "root",
     password: ".env",
     database: "employeeTracker_DB"
   });
+
+  const PORT = process.env.PORT || 3306;
+
+  app.listen(PORT, () =>
+  console.log(`Server is now listening on: http://localhost:${PORT}`)
+);
 
   async function promptUser(){
     inquirer.prompt([
@@ -66,6 +72,47 @@ var connection = mysql.createConnection({
                     endSession();
             };
         });
+};
+
+function viewEmployees() {
+
+};
+
+
+function viewDepartment() {
+
+
+};
+
+
+function viewRole() {
+
+};
+
+
+function addEmployee() {
+
+};
+
+
+function addDepartment() {
+
+};
+
+
+function addRole() {
+
+};
+
+
+function updateEmployee() {
+
+};
+
+function endSession() {
+
+  connection.end()
+
 };
 
 
