@@ -14,4 +14,23 @@ var connection = mysql.createConnection({
     database: "employeeTracker_DB"
   });
 
+  async function promptUser(){
+    inquirer.prompt([
+        {
+            type: 'list',
+            name: 'options',
+            message: 'What would you like to do?',
+            choices: [
+                "view All Employees",
+                "view All Employees By Department",
+                "view All Employees By Manager",
+                "Add Employee",
+                "Remove Employee",
+                "Update Employee Role",
+                "Update Employee Manager"
+            ]}
+}
+
+
+
 
