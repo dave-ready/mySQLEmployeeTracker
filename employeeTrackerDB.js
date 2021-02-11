@@ -20,12 +20,13 @@ const connection = mysql.createConnection({
   console.log(`Server is now listening on: http://localhost:${PORT}`)
 );
 
-  async function promptUser(){
-    inquirer.prompt([
+  async function promptUser() {
+    inquirer
+       .prompt([
         {
             type: 'list',
-            name: 'options',
             message: 'What would you like to do?',
+            name: 'options',
             choices: [
                 "view All Employees",
                 "view All Employees By Department",
@@ -75,6 +76,45 @@ const connection = mysql.createConnection({
 };
 
 function viewEmployees() {
+    return new Promise(function (resolve, reject){
+    connection.query("SELECT employee.first_name, employee.last_name FROM employee", function(err, res){
+        if(err) throw err;
+        
+    });
+});
+
+
+};
+
+async function addEmployee() {
+
+    var employeeRoles = await roles();
+    var managers = await managers();
+    inquirer
+      .prompt([
+        {
+            type: 'input',
+            message: "What is the employee's first name?",
+            name: 'firstName',
+        },
+        {
+            type: 'input',
+            message: "What is the employee's last name?",
+            name: 'lastName',
+        },
+        {
+            type: 'list',
+            message: "What is the employee's role?",
+            name: 'employeeRole',
+            choices: employeeRoles
+        },
+        {
+            type: 'list',
+            message: "Who is the employee's manager?",
+            name: 'employeeManager',
+            choices: managers
+        },
+    ])
 
 };
 
@@ -89,10 +129,6 @@ function viewRole() {
 
 };
 
-
-function addEmployee() {
-
-};
 
 
 function addDepartment() {
