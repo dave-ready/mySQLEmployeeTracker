@@ -159,6 +159,23 @@ function updateEmployee() {
 };
 
 function addDepartment() {
+    inquirer
+      .prompt([
+        {
+            type: 'list',
+            message: 'In what Department does the employee work?',
+            name: 'employeeDepartment',
+            choices: ['Sales', 'Engineering', 'Legal', 'Finance']
+        }
+    ]).then(function(res){
+        connection.query("INSERT INTO department SET ?",
+            { name: res.employeeDepartment }, 
+            function(err){
+                if (err) throw err
+                console.table(res)
+                promptUser();
+        }),
+    }),
 
 };
 
