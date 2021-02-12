@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     port: 3306,
     user: "root",
     password: ".env",
-    database: "employeeTracker_DB"
+    database: "employee_tracker_db"
   });
 
   const PORT = process.env.PORT || 3306;
@@ -150,7 +150,12 @@ async function addEmployee() {
 };
 
 function updateEmployee() {
-
+    connection.query,
+    function(err, res){
+        if (err) throw err
+        console.table(res)
+        promptUser();
+    },
 };
 
 function addDepartment() {
