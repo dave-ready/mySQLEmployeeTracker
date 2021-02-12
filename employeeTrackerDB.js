@@ -26,7 +26,7 @@ const connection = mysql.createConnection({
         {
             type: 'list',
             message: 'What would you like to do?',
-            name: 'options',
+            name: 'menu',
             choices: [
                 "view All Employees",
                 "view All Employees By Department",
@@ -39,8 +39,8 @@ const connection = mysql.createConnection({
 
               ]};
 
-          ]).then(function(res){
-            switch (res.options){
+          ]).then(function(response){
+            switch (response.menu){
                 case "view All Employees":
                     viewEmployees();
                 break; 
@@ -123,15 +123,17 @@ async function addEmployee() {
                   response.employeeManager
                   );
       let role = await new Promise(function(resolve, reject) {
-          connection.query("SELECT * FROM role_info WHERE title = ?", [response.employeeRole], function(err, res) {
-          if (err) reject(err);
-          resolve(response[0].id);
+          connection.query("SELECT * FROM role_info WHERE title = ?", [response.employeeRole], 
+          function(err, res) {
+            if (err) reject(err);
+            resolve(response[0].id);
       });
   });
       let manager = await new Promise(function(resolve, reject) {
-          connection.query("SELECT * FROM employee WHERE first_name = ?", [response.employeeManager], function(err, res) {
-          if (err) reject(err);
-          resolve(response[0].id);
+          connection.query("SELECT * FROM employee WHERE first_name = ?", [response.employeeManager], 
+          function(err, res) {
+            if (err) reject(err);
+            resolve(response[0].id);
       });
   });
       
@@ -163,13 +165,12 @@ function addDepartment() {
       .prompt([
         {
             type: 'list',
-            message: 'In what Department does the employee work?',
+            message: "In what Department does the employee work?",
             name: 'employeeDepartment',
             choices: ['Sales', 'Engineering', 'Legal', 'Finance']
         }
     ]).then(function(response) {
-        connection.query("INSERT INTO department SET ?",
-            { name: response.employeeDepartment }, 
+        connection.query(`INSERT INTO department SET ?", ("${response.employeeDepartment}")`, 
             function(err){
                 if (err) throw err
                 console.table(res)
@@ -195,9 +196,7 @@ function addRole() {
             
         },
     ]).then(function(response){
-        connection.query("INSERT INTO role_info SET ?",
-        { name: response.employeeRole, 
-                response.employeeSalary },
+        connection.query(`INSERT INTO role_info SET ?", ("${response.employeeRole}", "${response.employeeSalary}")`,
             function(err){
                 if (err) throw err
                 console.table(res)
