@@ -114,7 +114,51 @@ async function addEmployee() {
             name: 'employeeManager',
             choices: managers
         },
-    ])
+
+    ]).then(async function(response){
+      console.log(
+                  response.firstName, 
+                  response.lastName, 
+                  response.employeeRole, 
+                  response.employeeManager
+                  );
+      let role = await new Promise(function(resolve, reject){
+          connection.query("SELECT * FROM role_info WHERE title = ?", [response.employeeRole], function(err, res) {
+          if (err) reject(err);
+          resolve(response[0].id);
+      });
+  });
+      let manager = await new Promise(function(resolve, reject){
+          connection.query("SELECT * FROM employee WHERE first_name = ?", [response.employeeManager], function(err, res) {
+          if (err) reject(err);
+          resolve(response[0].id);
+      });
+  });
+      
+      connection.query(`INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES ("${response.firstName}", 
+                                                                                                 "${response.lastName}", 
+                                                                                                 "${role}", 
+                                                                                                 "${manager}")`,
+      async function(err, res){
+          if (err) throw err;
+          let employees = await employees();
+          //console.table(employees);
+          promptUser();
+      });
+  });
+  
+};
+
+function updateEmployee() {
+
+};
+
+function addDepartment() {
+
+};
+
+
+function addRole() {
 
 };
 
@@ -127,23 +171,9 @@ function viewDepartment() {
 
 function viewRole() {
 
-};
-
-
-
-function addDepartment() {
 
 };
 
-
-function addRole() {
-
-};
-
-
-function updateEmployee() {
-
-};
 
 function endSession() {
 
