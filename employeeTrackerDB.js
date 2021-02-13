@@ -14,7 +14,7 @@ const connection = mysql.createConnection({
     database: "employee_tracker_db"
   });
 
-  const PORT = process.env.PORT || 3306;
+  const PORT = process.env.PORT || 8080;
 
   app.listen(PORT, () =>
   console.log(`Server is now listening on: http://localhost:${PORT}`)
@@ -118,14 +118,14 @@ async function addEmployee() {
       //console.log(response.firstName, response.lastName, response.employeeRole, response.employeeManager);
       let role_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM role_info WHERE title = ?", {employeeRole: response.employeeRole}, 
-          function(err, response) {
+          function(err, res) {
             if (err) reject(err);
             resolve(response[0].id);
       });
   });
       let manager_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM employee WHERE first_name = ?", {employeeManager: response.employeeManager}, 
-          function(err, response) {
+          function(err, res) {
             if (err) reject(err);
             resolve(response[0].id);
       });
@@ -192,8 +192,8 @@ function addRole() {
         connection.query("INSERT INTO role_info SET ?", { employeeRole: response.employeeRole, 
                                                           employeeSalary: response.employeeSalary },
             function(err){
-                if (err) throw err
-                console.table(res)
+                if (err) throw err;
+                console.table(response)
                 promptUser();
         }),
     })
@@ -201,9 +201,13 @@ function addRole() {
 };
 
 function viewRole() {
-
-
-};
+    connection.query("SELECT * FROM role_info", function(err, response) {
+        if(err) throw err;                                                                                      ")
+        console.table(response);
+        });
+        
+        promptUser();  
+    };
 
 
 function viewDepartment() {
