@@ -28,31 +28,19 @@ const connection = mysql.createConnection({
             message: 'What would you like to do?',
             name: 'menu',
             choices: [
-                "view All Employees",
-                "view All Employees By Department",
-                "view All Employees By Role",
                 "Add Employee",
                 "Add Department",
                 "Add Role",
-                "Update Employee",
+                "view All Employees",
+                "view All Employees By Department",
+                "view All Employees By Role",
+                "Update Employee Role",
                 "End Session"
 
               ]};
 
           ]).then(function(response){
             switch (response.menu){
-                case "view All Employees":
-                    viewEmployees();
-                break; 
-
-                case "view All Employees By Department":
-                    viewDepartment();
-                break;
-
-                case "view All Employees By Role":
-                    viewRole();
-                break;
-
                 case "Add Employee":
                     addEmployee();
                 break;
@@ -65,8 +53,21 @@ const connection = mysql.createConnection({
                     addRole();
                 break;
 
-                case "Update Employee":
+                case "view All Employees":
+                    viewEmployees();
+                break; 
+
+                case "view All Employees By Department":
+                    viewDepartment();
+                break;
+
+                case "view All Employees By Role":
+                    viewRole();
+                break;
+
+                case "Update Employee Role":
                     updateEmployee();
+
                 break;
 
                 case "End Session":
@@ -74,14 +75,6 @@ const connection = mysql.createConnection({
                 break;
             };
         });
-};
-
-function viewEmployees() {
-    connection.query("SELECT * FROM employee", function(err, response) {
-    if(err) throw err;                                                                                      ")
-        console.table(response);
-    });
-    promptUser();  
 };
 
 
@@ -118,14 +111,14 @@ async function addEmployee() {
       //console.log(response.firstName, response.lastName, response.employeeRole, response.employeeManager);
       let role_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM role_info WHERE title = ?", {employeeRole: response.employeeRole}, 
-          function(err, res) {
+          function(err, response) {
             if (err) reject(err);
             resolve(response[0].id);
       });
   });
       let manager_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM employee WHERE first_name = ?", {employeeManager: response.employeeManager}, 
-          function(err, res) {
+          function(err, response) {
             if (err) reject(err);
             resolve(response[0].id);
       });
@@ -134,23 +127,14 @@ async function addEmployee() {
   });
       
       connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES" { firstName: response.firstName, lastName: response.lastName, role_ID, manager_ID},
-          async function(err, res) {
+          async function(err, response) {
             if (err) throw err;
             let employees = await employees();
-            //console.table(employees);
+            console.table(response);
             promptUser();
       });
   });
   
-};
-
-function updateEmployee() {
-    connection.query,
-    function(err, response){
-        if (err) throw err
-        console.table(response)
-        promptUser();
-    },
 };
 
 function addDepartment() {
@@ -200,20 +184,41 @@ function addRole() {
 
 };
 
+function viewEmployees() {
+    connection.query("SELECT * FROM employee", function(err, response) {
+    if(err) throw err;                                                                                      ")
+        console.table(response);
+    });
+    promptUser();  
+};
+
+
+function viewDepartment() {
+    connection.query("SELECT * FROM department", function(err, response) {
+        if (err) throw err;
+        console.table(response);
+        }),
+        promptUser();
+    },
+
+
 function viewRole() {
     connection.query("SELECT * FROM role_info", function(err, response) {
         if(err) throw err;                                                                                      ")
         console.table(response);
-        });
-        
+        }),
         promptUser();  
+    },
+
+    function updateEmployee() {
+        //connection.query("SELECT * FROM role_info WHERE title = ?", {employeeRole: response.employeeRole}, 
+        //function(err, response) {
+        //    if (err) throw err
+        //    console.table(response)
+        //    promptUser();
+        //}),
     };
 
-
-function viewDepartment() {
-
-
-};
 
 
 function endSession() {
