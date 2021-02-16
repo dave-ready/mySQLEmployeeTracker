@@ -234,21 +234,32 @@ async function viewRole(){
         promptUser();
 }
 
+
 async function selectRole(){
 
 };
 
-//async function updateEmployee() {
-        //connection.query("SELECT * FROM role_info WHERE title = ?", {employeeRole: response.employeeRole}, 
-        //function(err, response) {
-        //    if (err) throw err
-        //    console.table(response)
-        //    promptUser();
-        //}),
-    //};
+
+async function updateEmployee() {
+    connection.query("SELECT * FROM employee", 
+    function(err, response) {
+        if (err) throw err   
+        console.table(response);
+
+        })
+
+    connection.query("SELECT * FROM role_info", 
+    function(err, response) {
+        if (err) throw err 
+        console.log(err); 
+        console.table(response);
+        
+        })
+
+    }
 
 
-
+    
 function endSession() {
 
   connection.end()
