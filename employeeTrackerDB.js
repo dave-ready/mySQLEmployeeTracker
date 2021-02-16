@@ -4,23 +4,33 @@ const mysql = require("mysql");
 const fs = require("fs");
 const util = require("util");
 const cTable = require("console.table");
-const env = require(".env");
+require("dotenv").config();
 
-const connection = mysql.createConnection({
+
+const connection = mysql.createConnection ({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: "Willow1121",
+    password: process.env.PASSWORD,
     database: "employee_tracker_db"
   });
 
-  const PORT = process.env.PORT || 8080;
+  //console.log(process.env.PASS)
 
-  app.listen(PORT, () =>
-  console.log(`Server is now listening on: http://localhost:${PORT}`)
-);
+  const PORT = process.env.PORT || 3306;
 
-  async function promptUser() {
+//app.listen(PORT, function() {
+//  console.log("You are now listening on port: " + PORT);
+//});
+
+connection.connect(function(err){
+    if (err) throw err;
+    promptUser();
+    console.log("Database connection is now online on port: " + PORT);
+})
+
+
+async function promptUser() {
     inquirer
        .prompt([
         {
@@ -37,7 +47,7 @@ const connection = mysql.createConnection({
                 "Update Employee Role",
                 "End Session"
 
-              ]};
+              ]}
 
           ]).then(function(response){
             switch (response.menu){
@@ -126,7 +136,7 @@ async function addEmployee() {
       console.log(role_ID)
   });
       
-      connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES" { firstName: response.firstName, lastName: response.lastName, role_ID, manager_ID},
+      connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES", { firstName: response.firstName, lastName: response.lastName, role_ID, manager_ID},
           async function(err, response) {
             if (err) throw err;
             let employees = await employees();
@@ -137,7 +147,7 @@ async function addEmployee() {
   
 };
 
-function addDepartment() {
+async function addDepartment() {
     inquirer
       .prompt([
         {
@@ -152,13 +162,13 @@ function addDepartment() {
                 if (err) throw err
                 console.table(response);
                 promptUser();
-        }),
-    }),
+        });
+   });
 
 };
 
 
-function addRole() {
+async function addRole() {
     inquirer
       .prompt([
         {
@@ -179,45 +189,54 @@ function addRole() {
                 if (err) throw err;
                 console.table(response)
                 promptUser();
-        }),
+        })
     })
 
 };
 
-function viewEmployees() {
-    connection.query("SELECT * FROM employee", function(err, response) {
-    if(err) throw err;                                                                                      ")
-        console.table(response);
-    });
-    promptUser();  
+async function viewEmployees() {
+    connection.query("SELECT employee.first_name, employee.last_name FROM employee", function(err, res){
+    if(err) reject(err);
+    resolve(res);
+   
+    }),
+    promptUser(); 
 };
 
 
-function viewDepartment() {
+async function viewDepartment() {
     connection.query("SELECT * FROM department", function(err, response) {
-        if (err) throw err;
+        if (err) throw err,
         console.table(response);
         }),
         promptUser();
-    },
+    };
 
 
-function viewRole() {
-    connection.query("SELECT * FROM role_info", function(err, response) {
-        if(err) throw err;                                                                                      ")
-        console.table(response);
-        }),
-        promptUser();  
-    },
+//async function viewRole() {
+//    connection.query("SELECT * FROM role_info", function(err, response) {
+//        if (err) throw err,                                                                                     ")
+//        console.table(response);
+//        }),
+//        promptUser();  
+//    };
 
-    function updateEmployee() {
+async function viewRole(){
+    connection.query("SELECT * FROM role_info", function(err, res) {
+        if (err) throw err
+        console.table(res)
+        });
+        promptUser();
+}
+
+//async function updateEmployee() {
         //connection.query("SELECT * FROM role_info WHERE title = ?", {employeeRole: response.employeeRole}, 
         //function(err, response) {
         //    if (err) throw err
         //    console.table(response)
         //    promptUser();
         //}),
-    };
+    //};
 
 
 
