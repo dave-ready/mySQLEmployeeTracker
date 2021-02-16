@@ -6,6 +6,8 @@ const util = require("util");
 const cTable = require("console.table");
 require("dotenv").config();
 
+const PORT = process.env.PORT || 3306;
+
 
 const connection = mysql.createConnection ({
     host: "localhost",
@@ -15,13 +17,8 @@ const connection = mysql.createConnection ({
     database: "employee_tracker_db"
   });
 
-  //console.log(process.env.PASS)
+  console.log(process.env.PASSWORD)
 
-  const PORT = process.env.PORT || 3306;
-
-//app.listen(PORT, function() {
-//  console.log("You are now listening on port: " + PORT);
-//});
 
 connection.connect(function(err){
     if (err) throw err;
@@ -144,8 +141,24 @@ async function addEmployee() {
             promptUser();
       });
   });
-  
 };
+
+
+async function roles() {
+
+
+};
+
+async function managerss() {
+
+
+};
+
+async function employees() {
+
+
+};
+
 
 async function addDepartment() {
     inquirer
@@ -213,21 +226,17 @@ async function viewDepartment() {
     };
 
 
-//async function viewRole() {
-//    connection.query("SELECT * FROM role_info", function(err, response) {
-//        if (err) throw err,                                                                                     ")
-//        console.table(response);
-//        }),
-//        promptUser();  
-//    };
-
 async function viewRole(){
-    connection.query("SELECT * FROM role_info", function(err, res) {
+    connection.query("SELECT * FROM role_info", function(err, response) {
         if (err) throw err
-        console.table(res)
+        console.table(response)
         });
         promptUser();
 }
+
+async function selectRole(){
+
+};
 
 //async function updateEmployee() {
         //connection.query("SELECT * FROM role_info WHERE title = ?", {employeeRole: response.employeeRole}, 
