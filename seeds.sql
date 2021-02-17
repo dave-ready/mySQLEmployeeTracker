@@ -1,3 +1,5 @@
+USE employee_tracker_db
+
 INSERT INTO department (name) VALUES
     ('Sales'),
     ('Engineering'),
@@ -11,25 +13,23 @@ INSERT INTO role_info (title, salary, department_id) VALUES
     ('Controller', 60000, 4),
     ('Financial Controls Specialist', 70000, 4),
     ('Paralegal', 40000, 3);
-    ('Sales Broker', 80000, 1),
+    ('Sales Manager', 80000, 1),
     ('Accounts Payable Specialist', 55000, 4),
     ('Sales Associate', 55000, 1),
     
     
 INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES
-    ('Joe', 'Blow', 1, 2),
-    ('John', 'Dough', 2, 1),
+	('Pete', 'Shelley', 1, 3);
+    ('John', 'Dough', 2, ),
     ('Janet', 'Kay', 3, 4),
-    ('Shane', 'Macgowan', 4, 3),
-    ('Mary', 'Wilson', 5, 2),
-    ('Lou', 'Ferrigno', 6, 1),
+    ('Mary', 'Wilson', 4, 2),
+    ('Lou', 'Ferrigno', 5, 1),
+    ('Millie', 'Small', 6, NULL),
+    ('Shane', 'Macgowan', 6, NULL),
     ('Harry', 'Dean', 7, 1),
-    ('Debbie', 'Harry', 8, 4);
+    ('Debbie', 'Harry', 8, 4),
+    ('Joe', 'Blow', 9, 2),
     
     
-SELECT * FROM employee_tracker_db.employee;
+    
 
-SELECT * FROM employee_tracker_db.role_info;
-
-SELECT * FROM employee_tracker_db.department;
-   

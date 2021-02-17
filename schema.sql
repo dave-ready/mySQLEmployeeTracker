@@ -25,5 +25,10 @@ CREATE TABLE employee (
   FOREIGN KEY (manager_id) REFERENCES employee(id)
 );
 
+SELECT * FROM employee_tracker_db.employee;
+SELECT * FROM employee_tracker_db.role_info;
+SELECT * FROM employee_tracker_db.department;
+   
+
 
 
