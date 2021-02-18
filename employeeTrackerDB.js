@@ -172,15 +172,24 @@ async function managers() {
                 managerNames.push(response[i].first_name)
             }
             resolve(managerNames)
-        })
-    })
-
-
+        });
+    });
 };
 
+
 async function employees() {
+    return new Promise(function (resolve, reject){
+        let employeeNames = [];
+        connection.query("SELECT * FROM employee", 
+          function(err, response){
+            if(err) reject(err);
+            for (let i = 0; i < response.length; i++) {
+                employeeNames.push(response[i].employee)
 
-
+            };
+            resolve(employeeNames);
+        });
+    });
 };
 
 
@@ -267,22 +276,8 @@ async function selectRole(){
 
 
 async function updateEmployee() {
-    connection.query("SELECT * FROM employee", 
-    function(err, response) {
-        if (err) throw err   
-        console.table(response);
-
-        })
-
-    connection.query("SELECT * FROM role_info", 
-    function(err, response) {
-        if (err) throw err 
-        console.log(err); 
-        console.table(response);
-        
-        }).then
-        inquirer
-          .prompt([
+    inquirer
+      .prompt([
           {
             type: "input",
             message: "Please enter the first name of the employee being updated",
@@ -291,24 +286,40 @@ async function updateEmployee() {
     
           {
             type: "input",
-            message: "Please enter the new role id for the employee being entered",
+            message: "Please enter the new role id for the employee being updated",
             name: "newRole"
-          }
-        ])
-        .then(function(data) {
-          connection.query("UPDATE employee SET role_id=? WHERE first_name= ?", {employeeName: data.employeeName, newRole: data.newRole},
+          }],
+
+
+    ).then(function(data) {
+        connection.query("SELECT * FROM employee", 
+          function(err, response) {
+            if (err) throw err 
+            console.log(err);  
+            console.table(response);
+    
+        });
+    
+        connection.query("SELECT * FROM role_info", 
+          function(err, response) {
+            if (err) throw err 
+            console.log(err); 
+            console.table(response);
+
+        });
+
+        connection.query("UPDATE employee SET role_id=? WHERE first_name= ?", { employeeName: data.employeeName, newRole: data.newRole },
           function(err, response) {
             if (err) throw err;
             console.log(err)
             console.table(response);
             promptUser();
-          });
+          
         });
+});
 
-    }
+};
 
-
-    
 function endSession() {
 
   connection.end()
