@@ -172,7 +172,7 @@ async function addDepartment() {
     ]).then(function(response) {
         connection.query("INSERT INTO department SET ?", {employeeDepartment: response.employeeDepartment}, 
             function(err){
-                if (err) throw err
+                if (err) throw err;
                 console.table(response);
                 promptUser();
         });
@@ -254,7 +254,30 @@ async function updateEmployee() {
         console.log(err); 
         console.table(response);
         
-        })
+        }).then
+        inquirer
+          .prompt([
+          {
+            type: "input",
+            message: "Please enter the first name of the employee being updated",
+            name: "employeeName"
+          },
+    
+          {
+            type: "input",
+            message: "Please enter the role id the employee is being updated to",
+            name: "newRole"
+          }
+        ])
+        .then(function(response) {
+          connection.query("UPDATE employee SET role_id=? WHERE first_name= ?", {name: response.employeeName, name: response.newRole},
+          function(err, res) {
+            if (err) throw err;
+            console.log(err)
+            console.table(response);
+            promptUser();
+          });
+        });
 
     }
 
