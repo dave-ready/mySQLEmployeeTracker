@@ -121,20 +121,23 @@ async function addEmployee() {
             if (err) reject(err);
             resolve(response[0].id);
       });
+      console.log(role_ID)
   });
       let manager_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM employee WHERE first_name = ?", { employeeManager: data.employeeManager }, 
           function(err, response) {
             if (err) reject(err);
+            console.log(err);
             resolve(response[0].id);
       });
-      console.log(manager_ID);
-      console.log(role_ID)
+      console.log(manager_ID)
+      
   });
       
       connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES", { firstName: data.firstName, lastName: data.lastName, role_ID, manager_ID },
           async function(err, response) {
             if (err) throw err;
+            console.log(err);
             let employees = await employees();
             console.table(response);
             promptUser();
@@ -144,12 +147,12 @@ async function addEmployee() {
 
 
 async function roles() {
-    return new Promise(function(resolve, reject){
-        let roleNames = []
+    return new Promise(function(resolve, reject) {
+        let roleNames = [];
         connection.query("SELECT title FROM role_info", 
-        function(err, response){
+          function(err, response) {
             if(err) reject(err);
-            for (let i = 0; i < response.length; i++){
+            for (let i = 0; i < response.length; i++) {
                 roleNames.push(response[i].title)
             };
             resolve(roleNames);
@@ -160,6 +163,17 @@ async function roles() {
 
 
 async function managers() {
+    return new Promise(function(resolve, reject) {
+        let managerNames = [];
+        connection.query("SELECT first_name FROM employee WHERE manager_id IS NULL", 
+          function(err, response){
+            if (err) reject(err);
+            for (let i = 0; i < response.length; i++) {
+                managerNames.push(response[i].first_name)
+            }
+            resolve(managerNames)
+        })
+    })
 
 
 };
@@ -218,9 +232,9 @@ async function addRole() {
 
 async function viewEmployees() {
     connection.query("SELECT employee.first_name, employee.last_name FROM employee", 
-    function(err, res){
-      if(err) reject(err);
-      resolve(res);
+    function(err, response){
+      if(err) throw err,
+      console.table(response);
    
     }),
     promptUser(); 
