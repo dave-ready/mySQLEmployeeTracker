@@ -4,6 +4,7 @@ const mysql = require("mysql");
 const fs = require("fs");
 const util = require("util");
 const cTable = require("console.table");
+const { resolve } = require("path");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3306;
@@ -112,7 +113,7 @@ async function addEmployee() {
             message: "Who is the employee's manager?",
             name: 'employeeManager',
             choices: employeeManagers
-        },
+        }
 
     ]).then(async function(data) {
       let role_ID = await new Promise(function(resolve, reject) {
@@ -170,7 +171,8 @@ async function managers() {
             if (err) reject(err);
             for (let i = 0; i < response.length; i++) {
                 managerNames.push(response[i].first_name)
-            }
+            };
+            console.table(response);
             resolve(managerNames)
         });
     });
@@ -187,6 +189,7 @@ async function employees() {
                 employeeNames.push(response[i].employee)
 
             };
+            console.table(response);
             resolve(employeeNames);
         });
     });
@@ -202,6 +205,7 @@ async function addDepartment() {
             name: 'employeeDepartment',
             choices: ['Sales', 'Engineering', 'Legal', 'Finance']
         }
+
     ]).then(function(data) {
         connection.query("INSERT INTO department SET ?", { employeeDepartment: data.employeeDepartment }, 
             function(err, response){
@@ -227,8 +231,9 @@ async function addRole() {
             message: "What is the Employee's salary?",
             name: 'employeeSalary',
             
-        },
-    ]).then(function(response){
+        }],
+
+    ).then(function(response){
         connection.query("INSERT INTO role_info SET ?", { employeeRole: response.employeeRole, employeeSalary: response.employeeSalary },
             function(err, response){
                 if (err) throw err;
@@ -270,10 +275,19 @@ async function viewRole(){
 }
 
 
-async function selectRole(){
-
+async function selectRole() {
+    let roles = [];
+    connection.query("SELECT * FROM role_info", 
+      function(err, response){
+        if (err) throw err;
+        console.log(err)
+        for (let i = 0; i < response.length; i++) {
+          roles.push(response[i].role_info)
+        };
+        resolve(roles)
+    });
+    console.table(response)
 };
-
 
 async function updateEmployee() {
     inquirer
@@ -288,10 +302,9 @@ async function updateEmployee() {
             type: "input",
             message: "Please enter the new role id for the employee being updated",
             name: "newRole"
-          }],
-
-
-    ).then(function(data) {
+          }
+        
+    ]).then(function(data) {
         connection.query("SELECT * FROM employee", 
           function(err, response) {
             if (err) throw err 
