@@ -14,21 +14,21 @@ const connection = mysql.createConnection ({
     host: "localhost",
     port: 3306,
     user: "root",
-    password: process.env.PASSWORD,
+    password: process.env.DB_PASS,
     database: "employee_tracker_db"
   });
 
-  console.log(process.env.PASSWORD)
+
 
 
 connection.connect(function(err){
     if (err) throw err;
-    promptUser();
     console.log("Database connection is now online on port: " + PORT);
-})
+    promptUser();
+});
 
 
-async function promptUser() {
+function promptUser() {
     inquirer
        .prompt([
         {
@@ -47,8 +47,8 @@ async function promptUser() {
 
               ]}
 
-          ]).then(function(response){
-            switch (response.menu){
+          ]).then(function(data){
+            switch (data.menu){
                 case "Add Employee":
                     addEmployee();
                 break;
@@ -86,10 +86,11 @@ async function promptUser() {
 };
 
 
+
 async function addEmployee() {
 
-    var employeeRoles = await roles();
-    var managers = await managers();
+    let employeeRoles = await roles();
+    let employeeManagers = await managers();
     inquirer
       .prompt([
         {
@@ -118,43 +119,43 @@ async function addEmployee() {
     ]).then(async function(data) {
       let role_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM role_info WHERE title = ?", { employeeRole: data.employeeRole }, 
-          function(err, response) {
+          function(err, res) {
             if (err) reject(err);
-            resolve(response[0].id);
+            resolve(res);
       });
-      console.log(role_ID)
+    
   });
       let manager_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM employee WHERE first_name = ?", { employeeManager: data.employeeManager }, 
-          function(err, response) {
+          function(err, res) {
             if (err) reject(err);
             console.log(err);
-            resolve(response[0].id);
+            resolve(res);
       });
-      console.log(manager_ID)
+      
       
   });
-      
+      let employees = await employees();
       connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES", { firstName: data.firstName, lastName: data.lastName, role_ID, manager_ID },
-          async function(err, response) {
+          async function(err, res) {
             if (err) throw err;
             console.log(err);
-            let employees = await employees();
-            console.table(response);
-            promptUser();
+            console.table(res);
       });
+      promptUser();
   });
 };
 
 
-async function roles() {
+function roles() {
     return new Promise(function(resolve, reject) {
         let roleNames = [];
         connection.query("SELECT title FROM role_info", 
-          function(err, response) {
+          function(err, res) {
             if(err) reject(err);
-            for (let i = 0; i < response.length; i++) {
-                roleNames.push(response[i].title)
+            
+            for (let i = 0; i < res.length; i++) {
+                roleNames.push(res[i].title)
             };
             resolve(roleNames);
         })
@@ -163,33 +164,35 @@ async function roles() {
 };
 
 
-async function managers() {
+function managers() {
     return new Promise(function(resolve, reject) {
         let managerNames = [];
         connection.query("SELECT first_name FROM employee WHERE manager_id IS NULL", 
-          function(err, response){
+          function(err, res){
             if (err) reject(err);
-            for (let i = 0; i < response.length; i++) {
-                managerNames.push(response[i].first_name)
+
+            for (let i = 0; i < res.length; i++) {
+                managerNames.push(res[i].first_name)
             };
-            console.table(response);
+            console.table(res);
             resolve(managerNames)
         });
     });
 };
 
 
-async function employees() {
+
+function employees() {
     return new Promise(function (resolve, reject){
         let employeeNames = [];
         connection.query("SELECT * FROM employee", 
-          function(err, response){
+          function(err, res){
             if(err) reject(err);
-            for (let i = 0; i < response.length; i++) {
-                employeeNames.push(response[i].employee)
+            for (let i = 0; i < res.length; i++) {
+                employeeNames.push(res[i].employee)
 
             };
-            console.table(response);
+            console.table(res);
             resolve(employeeNames);
         });
     });
@@ -208,12 +211,12 @@ async function addDepartment() {
 
     ]).then(function(data) {
         connection.query("INSERT INTO department SET ?", { employeeDepartment: data.employeeDepartment }, 
-            function(err, response){
+            function(err, res){
                 if (err) throw err;
-                console.table(response);
-                promptUser();
+                console.table(res);
         });
    });
+   promptUser();
 
 };
 
@@ -233,60 +236,58 @@ async function addRole() {
             
         }],
 
-    ).then(function(response){
-        connection.query("INSERT INTO role_info SET ?", { employeeRole: response.employeeRole, employeeSalary: response.employeeSalary },
-            function(err, response){
+    ).then(function(data){
+        connection.query("INSERT INTO role_info SET ?", { employeeRole: data.employeeRole, employeeSalary: data.employeeSalary },
+            function(err, res){
                 if (err) throw err;
-                console.table(response)
-                promptUser();
+                console.table(res)
         })
     })
-
+    promptUser();
 };
 
-async function viewEmployees() {
+function viewEmployees() {
     connection.query("SELECT employee.first_name, employee.last_name FROM employee", 
-    function(err, response){
+    function(err, res){
       if(err) throw err,
-      console.table(response);
-   
-    }),
-    promptUser(); 
-};
+      console.table(res);
+      }),
+      promptUser(); 
+}
 
 
-async function viewDepartment() {
+function viewDepartment() {
     connection.query("SELECT * FROM department", 
-    function(err, response) {
+    function(err, res) {
         if (err) throw err,
-        console.table(response);
+        console.table(res);
         }),
         promptUser();
-    };
+    }
 
 
-async function viewRole(){
+function viewRole(){
     connection.query("SELECT * FROM role_info", 
-    function(err, response) {
+    function(err, res) {
         if (err) throw err
-        console.table(response)
+        console.table(res)
         });
         promptUser();
 }
 
 
-async function selectRole() {
+function selectRole() {
     let roles = [];
     connection.query("SELECT * FROM role_info", 
-      function(err, response){
+      function(err, res){
         if (err) throw err;
         console.log(err)
-        for (let i = 0; i < response.length; i++) {
-          roles.push(response[i].role_info)
+        for (let i = 0; i < res.length; i++) {
+          roles.push(res[i].role_info)
         };
-        resolve(roles)
+       
     });
-    console.table(response)
+    console.table(res)
 };
 
 async function updateEmployee() {
@@ -306,30 +307,30 @@ async function updateEmployee() {
         
     ]).then(function(data) {
         connection.query("SELECT * FROM employee", 
-          function(err, response) {
+          function(err, res) {
             if (err) throw err 
             console.log(err);  
-            console.table(response);
+            console.table(res);
     
         });
     
         connection.query("SELECT * FROM role_info", 
-          function(err, response) {
+          function(err, res) {
             if (err) throw err 
             console.log(err); 
-            console.table(response);
+            console.table(res);
 
         });
 
         connection.query("UPDATE employee SET role_id=? WHERE first_name= ?", { employeeName: data.employeeName, newRole: data.newRole },
-          function(err, response) {
+          function(err, res) {
             if (err) throw err;
             console.log(err)
-            console.table(response);
-            promptUser();
-          
-        });
+            console.table(res);
+
+          });
 });
+promptUser();
 
 };
 
