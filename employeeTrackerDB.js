@@ -7,7 +7,7 @@ const cTable = require("console.table");
 const { resolve } = require("path");
 require("dotenv").config();
 
-const PORT = process.env.PORT || 3306;
+const PORT = process.env.PORT || 8080;
 
 
 const connection = mysql.createConnection ({
@@ -88,7 +88,6 @@ function promptUser() {
 
 
 async function addEmployee() {
-
     let employeeRoles = await roles();
     let employeeManagers = await managers();
     inquirer
@@ -107,50 +106,107 @@ async function addEmployee() {
             type: 'list',
             message: "What is the employee's role?",
             name: 'employeeRole',
-            choices: selectRole()
+            choices: employeeRoles,
         },
         {
             type: 'list',
             message: "Who is the employee's manager?",
             name: 'employeeManager',
-            choices: managers()
+            choices: employeeManagers,
         }
-
-    ]).then(async function(data) {
+      ]).then(async function(data) {
+        console.table(data.firstName, data.lastName, data.employeeRole, data.employeeManager);
       let role_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM role_info WHERE title = ?", [data.employeeRole], 
           function(err, res) {
             if (err) reject(err);
-            resolve(res);
+            resolve(res[0].id);
       });
-    
-  });
+    });
       let manager_ID = await new Promise(function(resolve, reject) {
           connection.query("SELECT * FROM employee WHERE first_name = ?", [data.employeeManager], 
           function(err, res) {
             if (err) reject(err);
             //console.log(err);
-            resolve(res);
+            resolve(res[0].id);
       });
-      
-      
-  });
-      let employees = await employees();
+    });
       connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES", 
-      { 
-          first_name: data.firstName, 
-          last_name: data.lastName, 
-          role_id: data.employeeRole, 
-          manager_id: data.employeeManager
+         { 
+          firstName: data.firstName, 
+          lastName: data.lastName, 
+          role_ID, 
+          manager_ID
          },
           async function(err, res) {
             if (err) throw err;
-            //console.log(err);
-            console.table(res);
+            let employees = await employees();
+            console.table(employees);
+            promptUser();
       });
   });
-  //promptUser();
+
 };
+
+function addDepartment() {
+    inquirer
+      .prompt([
+        {
+            type: 'list',
+            message: "In what Department does the employee work?",
+            name: 'employeeDepartment',
+            choices: ['Sales', 'Engineering', 'Legal', 'Finance']
+        }
+
+    ]).then(function(data) {
+        connection.query("INSERT INTO department SET ?", 
+        { 
+            name: data.employeeDepartment 
+        }, 
+            function(err, res){
+                if (err) throw err;
+                console.table(res);
+        });
+   });
+   promptUser();
+};
+
+
+
+function addRole() {
+    connection.query("SELECT role_info.title AS title, role_info.salary AS salary, role_info.department_id AS department FROM role_info", 
+    function(err, res) {
+    inquirer
+      .prompt([
+        {
+            type: 'input',
+            message: "What is the employee's role?",
+            name: 'employeeRole',
+        },
+        {
+            type: 'input',
+            message: "What is the Employee's salary?",
+            name: 'employeeSalary',
+            
+        }],
+
+    ).then(function(data){
+        connection.query("INSERT INTO role_info SET ?", 
+        { 
+            title: data.employeeRole, 
+            salary: data.employeeSalary 
+        },
+            function(err, res){
+                if (err) throw err;
+                console.table(res)
+        })
+    })
+});
+
+};
+
+//promptUser();
+
 
 
 
@@ -207,73 +263,19 @@ async function employees() {
 };
 
 
-function addDepartment() {
-    inquirer
-      .prompt([
-        {
-            type: 'list',
-            message: "In what Department does the employee work?",
-            name: 'employeeDepartment',
-            choices: ['Sales', 'Engineering', 'Legal', 'Finance']
-        }
-
-    ]).then(function(data) {
-        connection.query("INSERT INTO department SET ?", 
-        { 
-            name: data.employeeDepartment 
-        }, 
-            function(err, res){
-                if (err) throw err;
-                console.table(res);
-        });
-   });
-   promptUser();
-};
-
-
-
-function addRole() {
-    inquirer
-      .prompt([
-        {
-            type: 'input',
-            message: "What is the employee's role?",
-            name: 'employeeRole',
-        },
-        {
-            type: 'input',
-            message: "What is the Employee's salary?",
-            name: 'employeeSalary',
-            
-        }],
-
-    ).then(function(data){
-        connection.query("INSERT INTO role_info SET ?", 
-        { 
-            title: data.employeeRole, 
-            salary: data.employeeSalary 
-        },
-            function(err, res){
-                if (err) throw err;
-                console.table(res)
-        })
-    })
-};
-//promptUser();
 
 function viewEmployees() {
-    connection.query("SELECT employee.first_name, employee.last_name, role_info.title, title_role.salary, department.dep_name AS Manager FROM employee INNER JOIN title_role on title_role.id = employee.role_id INNER JOIN department on department.id = title_role.department_id LEFT JOIN employee on employee.manager_id = e.id;"),
+    connection.query("SELECT employee.first_name, employee.last_name, role_info.title AS Title FROM employee JOIN role_info ON employee.role_id = role_info.id;", 
     function(err, res){
       if(err) throw err,
       console.table(res);
-      }),
-      //promptUser(); 
+      });
+      promptUser(); 
 };
 
 
-
 function viewDepartment() {
-    connection.query("SELECT * FROM department", 
+    connection.query("SELECT department.name AS title FROM department", 
     function(err, res) {
         if (err) throw err,
         console.table(res);
@@ -281,18 +283,14 @@ function viewDepartment() {
         promptUser();
     }
 
-
-
 function viewRole(){
-    connection.query("SELECT * FROM role_info", 
+    connection.query("SELECT role_info.title AS title FROM employee JOIN role_info ON employee.role_id = role_info.id", 
     function(err, res) {
         if (err) throw err
         console.table(res)
         });
         promptUser();
 }
-
-
 
 function selectRole() {
     let roles = [];
@@ -313,14 +311,12 @@ function updateEmployee() {
     connection.query("SELECT * FROM employee", 
     function(err, res) {
         if(err) throw err;
-        //console.log(err),
         console.table(res);
         })
 
     connection.query("SELECT * FROM role", 
     function(err, res) {
         if(err) throw err;
-        //console.log(err);
         console.table(res);
     }).then
     inquirer
@@ -342,7 +338,6 @@ function updateEmployee() {
       connection.query('UPDATE employee SET role_id=? WHERE first_name= ?',[data.employeeName, data.newRole],
       function(err, res) {
         if (err) throw err;
-        //console.log(res);
         console.table(res);
         promptUser();
       });
