@@ -107,18 +107,18 @@ async function addEmployee() {
             type: 'list',
             message: "What is the employee's role?",
             name: 'employeeRole',
-            choices: employeeRoles
+            choices: selectRole()
         },
         {
             type: 'list',
             message: "Who is the employee's manager?",
             name: 'employeeManager',
-            choices: employeeManagers
+            choices: managers()
         }
 
     ]).then(async function(data) {
       let role_ID = await new Promise(function(resolve, reject) {
-          connection.query("SELECT * FROM role_info WHERE title = ?", { employeeRole: data.employeeRole }, 
+          connection.query("SELECT * FROM role_info WHERE title = ?", [data.employeeRole], 
           function(err, res) {
             if (err) reject(err);
             resolve(res);
@@ -126,28 +126,35 @@ async function addEmployee() {
     
   });
       let manager_ID = await new Promise(function(resolve, reject) {
-          connection.query("SELECT * FROM employee WHERE first_name = ?", { employeeManager: data.employeeManager }, 
+          connection.query("SELECT * FROM employee WHERE first_name = ?", [data.employeeManager], 
           function(err, res) {
             if (err) reject(err);
-            console.log(err);
+            //console.log(err);
             resolve(res);
       });
       
       
   });
       let employees = await employees();
-      connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES", { firstName: data.firstName, lastName: data.lastName, role_ID, manager_ID },
+      connection.query("INSERT INTO employee(first_name, last_name, role_id, manager_id) VALUES", 
+      { 
+          first_name: data.firstName, 
+          last_name: data.lastName, 
+          role_id: data.employeeRole, 
+          manager_id: data.employeeManager
+         },
           async function(err, res) {
             if (err) throw err;
-            console.log(err);
+            //console.log(err);
             console.table(res);
       });
-      promptUser();
   });
+  //promptUser();
 };
 
 
-function roles() {
+
+async function roles() {
     return new Promise(function(resolve, reject) {
         let roleNames = [];
         connection.query("SELECT title FROM role_info", 
@@ -164,7 +171,7 @@ function roles() {
 };
 
 
-function managers() {
+async function managers() {
     return new Promise(function(resolve, reject) {
         let managerNames = [];
         connection.query("SELECT first_name FROM employee WHERE manager_id IS NULL", 
@@ -182,14 +189,15 @@ function managers() {
 
 
 
-function employees() {
+async function employees() {
     return new Promise(function (resolve, reject){
         let employeeNames = [];
-        connection.query("SELECT * FROM employee", 
+        connection.query("SELECT first_name FROM employee", 
           function(err, res){
             if(err) reject(err);
+
             for (let i = 0; i < res.length; i++) {
-                employeeNames.push(res[i].employee)
+                employeeNames.push(res[i].first_name)
 
             };
             console.table(res);
@@ -199,7 +207,7 @@ function employees() {
 };
 
 
-async function addDepartment() {
+function addDepartment() {
     inquirer
       .prompt([
         {
@@ -210,18 +218,21 @@ async function addDepartment() {
         }
 
     ]).then(function(data) {
-        connection.query("INSERT INTO department SET ?", { employeeDepartment: data.employeeDepartment }, 
+        connection.query("INSERT INTO department SET ?", 
+        { 
+            name: data.employeeDepartment 
+        }, 
             function(err, res){
                 if (err) throw err;
                 console.table(res);
         });
    });
    promptUser();
-
 };
 
 
-async function addRole() {
+
+function addRole() {
     inquirer
       .prompt([
         {
@@ -237,23 +248,28 @@ async function addRole() {
         }],
 
     ).then(function(data){
-        connection.query("INSERT INTO role_info SET ?", { employeeRole: data.employeeRole, employeeSalary: data.employeeSalary },
+        connection.query("INSERT INTO role_info SET ?", 
+        { 
+            title: data.employeeRole, 
+            salary: data.employeeSalary 
+        },
             function(err, res){
                 if (err) throw err;
                 console.table(res)
         })
     })
-    promptUser();
 };
+//promptUser();
 
 function viewEmployees() {
-    connection.query("SELECT employee.first_name, employee.last_name FROM employee", 
+    connection.query("SELECT employee.first_name, employee.last_name, role_info.title, title_role.salary, department.dep_name AS Manager FROM employee INNER JOIN title_role on title_role.id = employee.role_id INNER JOIN department on department.id = title_role.department_id LEFT JOIN employee on employee.manager_id = e.id;"),
     function(err, res){
       if(err) throw err,
       console.table(res);
       }),
-      promptUser(); 
-}
+      //promptUser(); 
+};
+
 
 
 function viewDepartment() {
@@ -266,6 +282,7 @@ function viewDepartment() {
     }
 
 
+
 function viewRole(){
     connection.query("SELECT * FROM role_info", 
     function(err, res) {
@@ -274,6 +291,7 @@ function viewRole(){
         });
         promptUser();
 }
+
 
 
 function selectRole() {
@@ -290,49 +308,47 @@ function selectRole() {
     console.table(res)
 };
 
-async function updateEmployee() {
+function updateEmployee() {
+
+    connection.query("SELECT * FROM employee", 
+    function(err, res) {
+        if(err) throw err;
+        //console.log(err),
+        console.table(res);
+        })
+
+    connection.query("SELECT * FROM role", 
+    function(err, res) {
+        if(err) throw err;
+        //console.log(err);
+        console.table(res);
+    }).then
     inquirer
       .prompt([
-          {
-            type: "input",
-            message: "Please enter the first name of the employee being updated",
-            name: "employeeName"
-          },
+    {
+        type: "input",
+        message: "Please enter the first name of the employee being updated",
+        name: "employeeName"
+    },
     
-          {
-            type: "input",
-            message: "Please enter the new role id for the employee being updated",
-            name: "newRole"
-          }
-        
-    ]).then(function(data) {
-        connection.query("SELECT * FROM employee", 
-          function(err, res) {
-            if (err) throw err 
-            console.log(err);  
-            console.table(res);
-    
-        });
-    
-        connection.query("SELECT * FROM role_info", 
-          function(err, res) {
-            if (err) throw err 
-            console.log(err); 
-            console.table(res);
+    {
+        type: "input",
+        message: "Please enter the new role id for the employee being updated",
+        name: "newRole"
+          
+    }
 
-        });
-
-        connection.query("UPDATE employee SET role_id=? WHERE first_name= ?", { employeeName: data.employeeName, newRole: data.newRole },
-          function(err, res) {
-            if (err) throw err;
-            console.log(err)
-            console.table(res);
-
-          });
-});
-promptUser();
-
+  ]).then(function(data) {
+      connection.query('UPDATE employee SET role_id=? WHERE first_name= ?',[data.employeeName, data.newRole],
+      function(err, res) {
+        if (err) throw err;
+        //console.log(res);
+        console.table(res);
+        promptUser();
+      });
+    });
 };
+
 
 function endSession() {
 
